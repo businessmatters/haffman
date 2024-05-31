@@ -1,0 +1,47 @@
+import heapq
+from collections import defaultdict
+
+# Определение функции для построения кодов Хаффмана
+def build_huffman_tree(freq_table):
+    heap = [[weight, [symbol, ""]] for symbol, weight in freq_table.items()]
+    heapq.heapify(heap)
+    while len(heap) > 1:
+        lo = heapq.heappop(heap)
+        hi = heapq.heappop(heap)
+        for pair in lo[1:]:
+            pair[1] = '0' + pair[1]
+        for pair in hi[1:]:
+            pair[1] = '1' + pair[1]
+        heapq.heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])
+    return sorted(heapq.heappop(heap)[1:], key=lambda p: (len(p[-1]), p))
+
+# Функция для кодирования текста с использованием построенных кодов Хаффмана
+def encode_text(text, codes):
+    encoded_text = ""
+    for symbol in text:
+        encoded_text += codes[symbol]
+    return encoded_text
+
+# Пример текста для кодирования
+text = "привет как дела?"
+
+# Создание таблицы частот символов в тексте
+freq_table = defaultdict(int)
+for symbol in text:
+    freq_table[symbol] += 1
+
+# Построение дерева Хаффмана
+huffman_tree = build_huffman_tree(freq_table)
+
+# Создание таблицы кодов символов
+codes = {symbol: code for symbol, code in huffman_tree}
+
+# Кодирование текста с помощью таблицы кодов
+encoded_text = encode_text(text, codes)
+
+# Вывод результатов
+print("Original text:", text)
+print("Encoded text:", encoded_text)
+print("Huffman codes:")
+for symbol, code in codes.items():
+    print(f"'{symbol}': {code}")
